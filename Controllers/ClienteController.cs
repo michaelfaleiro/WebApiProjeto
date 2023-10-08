@@ -59,14 +59,13 @@ public class ClienteController : ControllerBase
             var clientes = await context.Clientes
                 .AsNoTracking()
                 .Include(x => x.Contatos)
-                //.Select(x=> new ListClienteViewModel
-                //{
-                //    Id = x.Id,
-                //    Nome = x.Nome,
-                //    SobreNome = x.SobreNome,
-                //    Telefone = x.Contatos
-                    
-                //})
+                .Select(x=> new ListClienteViewModel
+                {
+                    Id = x.Id,
+                    Nome = x.Nome,
+                    SobreNome = x.SobreNome,
+                    Contatos = x.Contatos
+                })
                 .Skip(page * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -79,7 +78,7 @@ public class ClienteController : ControllerBase
                 total = count,
                 page,
                 pageSize,
-                clientes,
+                clientes
             }));
         }
         catch (DbUpdateException)
@@ -98,11 +97,26 @@ public class ClienteController : ControllerBase
     {
         try
         {
-            var cliente = await context.Clientes.AsNoTracking().Include(x=> x.Contatos).FirstOrDefaultAsync(x => x.Id == id);
+            var cliente = await context.Clientes
+                .AsNoTracking()
+                .Include(x => x.Contatos)
+                .Select(x => new ListClienteViewModel
+                {
+                    Id = x.Id,
+                    Nome = x.Nome,
+                    SobreNome = x.SobreNome,
+                    Contatos = x.Contatos
+                })
+                .FirstOrDefaultAsync(x => x.Id == id);
+                
+                
             if (cliente == null)
                 return NotFound(new ResultViewModel<Cliente>("Não foi encontrado"));
 
-            return Ok(new ResultViewModel<Cliente>(cliente));
+            return Ok(new ResultViewModel<dynamic>(new
+            {
+                cliente
+            }));
         }
         catch (DbUpdateException)
         {
