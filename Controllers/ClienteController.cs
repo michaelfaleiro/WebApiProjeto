@@ -9,7 +9,7 @@ using WebApiProjeto.ViewModels.Clientes;
 namespace WebApiProjeto.Controllers;
 
 [ApiController]
-[Route("v1")]
+[Route("v1/api")]
 public class ClienteController : ControllerBase
 {
 
@@ -24,10 +24,11 @@ public class ClienteController : ControllerBase
 
         try
         {
-            Cliente cliente = new Cliente
+            Cliente cliente = new()
             {
                 Nome = model.Nome,
                 SobreNome = model.SobreNome,
+                Telefone = model.Telefone
             };
             await context.Clientes.AddAsync(cliente);
             await context.SaveChangesAsync();
@@ -58,13 +59,13 @@ public class ClienteController : ControllerBase
             var count = await context.Clientes.AsNoTracking().CountAsync();
             var clientes = await context.Clientes
                 .AsNoTracking()
-                .Include(x => x.Contatos)
-                .Select(x=> new ListClienteViewModel
+                .Select(x => new ListClienteViewModel
                 {
                     Id = x.Id,
                     Nome = x.Nome,
                     SobreNome = x.SobreNome,
-                    Contatos = x.Contatos
+                    Telefone = x.Telefone,
+
                 })
                 .Skip(page * pageSize)
                 .Take(pageSize)
@@ -78,7 +79,7 @@ public class ClienteController : ControllerBase
                 total = count,
                 page,
                 pageSize,
-                clientes
+                clientes,
             }));
         }
         catch (DbUpdateException)
@@ -99,17 +100,16 @@ public class ClienteController : ControllerBase
         {
             var cliente = await context.Clientes
                 .AsNoTracking()
-                .Include(x => x.Contatos)
                 .Select(x => new ListClienteViewModel
                 {
                     Id = x.Id,
                     Nome = x.Nome,
                     SobreNome = x.SobreNome,
-                    Contatos = x.Contatos
+                    Telefone = x.Telefone,
                 })
                 .FirstOrDefaultAsync(x => x.Id == id);
-                
-                
+
+
             if (cliente == null)
                 return NotFound(new ResultViewModel<Cliente>("Não foi encontrado"));
 
@@ -147,6 +147,7 @@ public class ClienteController : ControllerBase
 
             cliente.Nome = model.Nome;
             cliente.SobreNome = model.SobreNome;
+            cliente.Telefone = model.Telefone;
 
             context.Clientes.Update(cliente);
             await context.SaveChangesAsync();
