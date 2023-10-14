@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WebApiProjeto.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231012194303_relaciomento_orcamento_produto")]
-    partial class relaciomento_orcamento_produto
+    [Migration("20231014220643_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,21 @@ namespace WebApiProjeto.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("OrcamentoProduto", b =>
+                {
+                    b.Property<int>("OrcamentosId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProdutosId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("OrcamentosId", "ProdutosId");
+
+                    b.HasIndex("ProdutosId");
+
+                    b.ToTable("OrcamentoProduto");
+                });
 
             modelBuilder.Entity("WebApiProjeto.Models.Cliente", b =>
                 {
@@ -67,38 +82,11 @@ namespace WebApiProjeto.Migrations
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
 
                     b.ToTable("Orcamentos");
-                });
-
-            modelBuilder.Entity("WebApiProjeto.Models.OrcamentoProduto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("OrcamentoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProdutoId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrcamentoId");
-
-                    b.HasIndex("ProdutoId");
-
-                    b.ToTable("OrcamentoProdutos");
                 });
 
             modelBuilder.Entity("WebApiProjeto.Models.Produto", b =>
@@ -132,6 +120,21 @@ namespace WebApiProjeto.Migrations
                     b.ToTable("Produtos");
                 });
 
+            modelBuilder.Entity("OrcamentoProduto", b =>
+                {
+                    b.HasOne("WebApiProjeto.Models.Orcamento", null)
+                        .WithMany()
+                        .HasForeignKey("OrcamentosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WebApiProjeto.Models.Produto", null)
+                        .WithMany()
+                        .HasForeignKey("ProdutosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("WebApiProjeto.Models.Orcamento", b =>
                 {
                     b.HasOne("WebApiProjeto.Models.Cliente", "Cliente")
@@ -143,38 +146,9 @@ namespace WebApiProjeto.Migrations
                     b.Navigation("Cliente");
                 });
 
-            modelBuilder.Entity("WebApiProjeto.Models.OrcamentoProduto", b =>
-                {
-                    b.HasOne("WebApiProjeto.Models.Orcamento", "Orcamento")
-                        .WithMany("OrcamentoProdutos")
-                        .HasForeignKey("OrcamentoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebApiProjeto.Models.Produto", "Produto")
-                        .WithMany("OrcamentoProdutos")
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Orcamento");
-
-                    b.Navigation("Produto");
-                });
-
             modelBuilder.Entity("WebApiProjeto.Models.Cliente", b =>
                 {
                     b.Navigation("Orcamentos");
-                });
-
-            modelBuilder.Entity("WebApiProjeto.Models.Orcamento", b =>
-                {
-                    b.Navigation("OrcamentoProdutos");
-                });
-
-            modelBuilder.Entity("WebApiProjeto.Models.Produto", b =>
-                {
-                    b.Navigation("OrcamentoProdutos");
                 });
 #pragma warning restore 612, 618
         }

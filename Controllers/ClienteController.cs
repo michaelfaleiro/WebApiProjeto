@@ -59,12 +59,17 @@ public class ClienteController : ControllerBase
             var count = await context.Clientes.AsNoTracking().CountAsync();
             var clientes = await context.Clientes
                 .AsNoTracking()
-                .Select(x => new ListClienteViewModel
+                .Include(c => c.Orcamentos)
+                .Select(x => new 
                 {
-                    Id = x.Id,
-                    Nome = x.Nome,
-                    SobreNome = x.SobreNome,
-                    Telefone = x.Telefone,
+                    x.Id,
+                    x.Nome,
+                    x.SobreNome,
+                    x.Telefone,
+                    Orcamentos = x.Orcamentos.Select(o => new
+                    {
+                        o.Id,
+                    })
 
                 })
                 .Skip(page * pageSize)
@@ -100,12 +105,17 @@ public class ClienteController : ControllerBase
         {
             var cliente = await context.Clientes
                 .AsNoTracking()
-                .Select(x => new ListClienteViewModel
+                .Include(o => o.Orcamentos)
+                .Select(x => new 
                 {
                     Id = x.Id,
                     Nome = x.Nome,
                     SobreNome = x.SobreNome,
                     Telefone = x.Telefone,
+                    Orcamentos = x.Orcamentos.Select(o => new
+                    {
+                        o.Id,
+                    })
                 })
                 .FirstOrDefaultAsync(x => x.Id == id);
 

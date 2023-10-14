@@ -8,7 +8,6 @@ public class AppDbContext : DbContext
     private readonly IConfiguration _configuration;
 
     public DbSet<Cliente> Clientes { get; set; }
-    public DbSet<OrcamentoProduto> OrcamentoProdutos { get; set; }
     public DbSet<Orcamento> Orcamentos { get; set; }
     public DbSet<Produto> Produtos { get; set; }
 

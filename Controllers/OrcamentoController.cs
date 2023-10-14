@@ -31,7 +31,7 @@ public class OrcamentoController : ControllerBase
 
             Orcamento orcamento = new()
             {
-                ClienteId = cliente.Id,
+                Cliente = cliente
             };
 
             await context.Orcamentos.AddAsync(orcamento);
@@ -60,7 +60,9 @@ public class OrcamentoController : ControllerBase
     {
         try
         {
-            var orcamento = await context.Orcamentos.FirstOrDefaultAsync(x => x.Id == orcamentoid);
+            var orcamento = await context.Orcamentos
+                .Include(x => x.Produtos)
+                .FirstOrDefaultAsync(x => x.Id == orcamentoid);
             if (orcamento == null)
                 return BadRequest(new ResultViewModel<Orcamento>("Orçamento não encontrado"));
 
@@ -68,16 +70,20 @@ public class OrcamentoController : ControllerBase
             if (produto == null)
                 return BadRequest(new ResultViewModel<Produto>("Produto não encontrado"));
 
-            OrcamentoProduto orcamentoProduto = new()
+            if (orcamento.Produtos.Any(x=> x.Id == produto.Id))
+                return BadRequest(new ResultViewModel<Produto>("Produto já adicionado"));
+
+            orcamento.Produtos = new List<Produto>()
             {
-                Orcamento = orcamento,
-                Produto = produto
+                produto,
             };
 
-            await context.OrcamentoProdutos.AddAsync(orcamentoProduto);
             await context.SaveChangesAsync();
 
-            return Ok(orcamento);
+            return Ok(new ResultViewModel<dynamic>(new
+            {
+                orcamento
+            }));
 
         }
         catch (DbUpdateException)
@@ -102,9 +108,23 @@ public class OrcamentoController : ControllerBase
             var orcamentos = await context.Orcamentos
             .AsNoTracking()
             .Include(x => x.Cliente)
+            .Include(p => p.Produtos)
+            .Select(o => new
+            {
+                Id = o.Id,
+                Cliente = o.Cliente,
+                Produtos = o.Produtos.Select(p => new
+                {
+                    Id = p.Id,
+                    Nome = p.Nome,
+                    Sku = p.Sku,
+                    PrecoVenda = p.PrecoVenda
+                })
+
+            })
             .ToListAsync();
 
-            return Ok(new ResultViewModel<List<Orcamento>>(orcamentos));
+            return Ok(new ResultViewModel<dynamic>(orcamentos));
         }
         catch (DbUpdateException)
         {
@@ -128,30 +148,23 @@ public class OrcamentoController : ControllerBase
         {
             var orcamento = await context.Orcamentos
             .AsNoTracking()
-            .Include(c => c.Cliente)
-            .Include(x => x.OrcamentoProdutos)
-            .ThenInclude(op => op.Produto)
+            .Include(o => o.Cliente)
+            .Include(c => c.Produtos)
+            .Select(o => new
+            {
+                Id = o.Id,
+                Cliente = o.Cliente,
+                Produtos = o.Produtos
+
+            })
             .FirstOrDefaultAsync(x => x.Id == id);
 
             if (orcamento == null) return BadRequest(new ResultViewModel<Orcamento>("Orçamento não encontrado"));
 
-            var produtos = orcamento.OrcamentoProdutos.Select(op => new
-            {
-                Id = op.Produto.Id,
-                nome = op.Produto.Nome,
-                marca = op.Produto.Marca,
-                sku = op.Produto.Sku,
-                Precovenda = op.Produto.PrecoVenda
-            }).ToList();
 
             return Ok(new ResultViewModel<dynamic>(new
             {
-                orcamentos = new
-                {
-                    Id = orcamento.Id,
-                    cliente = orcamento.Cliente,
-                    produtos
-                },
+                orcamento
 
 
             }));

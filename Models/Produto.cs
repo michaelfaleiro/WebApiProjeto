@@ -7,7 +7,8 @@ public class Produto
     public string Nome { get; set; }
     public string Marca { get; set; }
     public double PrecoVenda { get; set; }
-    public ICollection<OrcamentoProduto> OrcamentoProdutos { get; set; }
+
+    public List<Orcamento> Orcamentos { get; set; }
 
     public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 }

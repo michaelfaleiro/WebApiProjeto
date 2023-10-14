@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace WebApiProjeto.Models;
 
 public class Cliente
@@ -8,10 +6,7 @@ public class Cliente
 
     public string Nome { get; set; }
     public string SobreNome { get; set; }
-
     public string Telefone { get; set; }
-    [JsonIgnore]
-    public ICollection<Orcamento> Orcamentos { get; set; }
-
+    public List<Orcamento> Orcamentos { get; set; }
     public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
 }

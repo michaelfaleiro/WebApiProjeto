@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WebApiProjeto.Migrations
 {
     /// <inheritdoc />
-    public partial class relaciomento_orcamento_produto : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,7 +52,6 @@ namespace WebApiProjeto.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ClienteId = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
                     DataCriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -67,40 +66,33 @@ namespace WebApiProjeto.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrcamentoProdutos",
+                name: "OrcamentoProduto",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    OrcamentoId = table.Column<int>(type: "integer", nullable: false),
-                    ProdutoId = table.Column<int>(type: "integer", nullable: false)
+                    OrcamentosId = table.Column<int>(type: "integer", nullable: false),
+                    ProdutosId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrcamentoProdutos", x => x.Id);
+                    table.PrimaryKey("PK_OrcamentoProduto", x => new { x.OrcamentosId, x.ProdutosId });
                     table.ForeignKey(
-                        name: "FK_OrcamentoProdutos_Orcamentos_OrcamentoId",
-                        column: x => x.OrcamentoId,
+                        name: "FK_OrcamentoProduto_Orcamentos_OrcamentosId",
+                        column: x => x.OrcamentosId,
                         principalTable: "Orcamentos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrcamentoProdutos_Produtos_ProdutoId",
-                        column: x => x.ProdutoId,
+                        name: "FK_OrcamentoProduto_Produtos_ProdutosId",
+                        column: x => x.ProdutosId,
                         principalTable: "Produtos",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrcamentoProdutos_OrcamentoId",
-                table: "OrcamentoProdutos",
-                column: "OrcamentoId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrcamentoProdutos_ProdutoId",
-                table: "OrcamentoProdutos",
-                column: "ProdutoId");
+                name: "IX_OrcamentoProduto_ProdutosId",
+                table: "OrcamentoProduto",
+                column: "ProdutosId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orcamentos_ClienteId",
@@ -112,7 +104,7 @@ namespace WebApiProjeto.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "OrcamentoProdutos");
+                name: "OrcamentoProduto");
 
             migrationBuilder.DropTable(
                 name: "Orcamentos");
