@@ -2,13 +2,25 @@
 
 public class Produto
 {
-    public int Id { get; set; }
-    public string Sku { get; set; }
-    public string Nome { get; set; }
-    public string Marca { get; set; }
-    public double PrecoVenda { get; set; }
+    public Produto()
+    {
+    }
 
-    public List<Orcamento> Orcamentos { get; set; }
+    public Produto( string sku, string nome, string marca, double precoVenda)
+    {
+        Sku = sku;
+        Nome = nome;
+        Marca = marca;
+        PrecoVenda = precoVenda;
+    }
 
-    public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
+    public int Id { get; private set; }
+    public string Sku { get; private set; } = string.Empty;
+    public string Nome { get; private set; } = string.Empty;
+    public string Marca { get; private set; } = string.Empty;
+    public double PrecoVenda { get; private set; }
+
+    public List<Orcamento> Orcamentos { get; set; } = new();
+
+    public DateTime DataCriacao { get;  private set; } = DateTime.UtcNow;
 }

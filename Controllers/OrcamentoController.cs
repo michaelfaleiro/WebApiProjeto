@@ -70,7 +70,7 @@ public class OrcamentoController : ControllerBase
             if (produto == null)
                 return BadRequest(new ResultViewModel<Produto>("Produto não encontrado"));
 
-            if (orcamento.Produtos.Any(x=> x.Id == produto.Id))
+            if (orcamento.Produtos.Any(x => x.Id == produto.Id))
                 return BadRequest(new ResultViewModel<Produto>("Produto já adicionado"));
 
             orcamento.Produtos = new List<Produto>()
@@ -168,29 +168,6 @@ public class OrcamentoController : ControllerBase
 
 
             }));
-        }
-        catch (DbUpdateException)
-        {
-
-            return StatusCode(500, new ResultViewModel<Orcamento>("Erro ao carregar os dados"));
-        }
-        catch
-        {
-
-            return StatusCode(500, new ResultViewModel<Orcamento>("Erro interno no servidor"));
-        }
-    }
-
-    [HttpGet("orcamentos/{orcamentoid:int}/produtos")]
-    public async Task<IActionResult> ListProdutosOrcamentoAsync(
-        [FromServices] AppDbContext context,
-        int orcamentoid
-    )
-    {
-        try
-        {
-
-            return Ok();
         }
         catch (DbUpdateException)
         {

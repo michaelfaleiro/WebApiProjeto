@@ -1,7 +1,6 @@
-using Data;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApiProjeto.Data.Interface;
 using WebApiProjeto.Extensions;
 using WebApiProjeto.Models;
 using WebApiProjeto.ViewModels;
@@ -13,9 +12,18 @@ namespace WebApiProjeto.Controllers;
 [Route("v1/api")]
 public class ProdutoController : ControllerBase
 {
+
+   
+    private readonly IProdutoInterface _produtoInterface;
+
+    public ProdutoController( IProdutoInterface produtoInterface)
+    {
+        
+        _produtoInterface = produtoInterface;
+    }
+
     [HttpPost("produtos")]
     public async Task<IActionResult> NovoProdutoAsync(
-        [FromServices] AppDbContext context,
         [FromBody] EditorProdutoViewModel model
     )
     {
@@ -26,16 +34,15 @@ public class ProdutoController : ControllerBase
                 return BadRequest(new ResultViewModel<Produto>(ModelState.GetErrors()));
             }
 
-            Produto produto = new()
-            {
-                Nome = model.Nome,
-                Marca = model.Marca,
-                Sku = model.Sku,
-                PrecoVenda = model.PrecoVenda,
-            };
+            Produto produto = new(
+                model.Sku,
+                model.Nome,
+                model.Marca,
+                model.PrecoVenda
+                );
 
-            await context.Produtos.AddAsync(produto);
-            await context.SaveChangesAsync();
+          
+            await _produtoInterface.CreateProduto(produto);
 
             return Created($"v1/api/produtos/{produto.Id}", new ResultViewModel<Produto>(produto));
 
@@ -49,4 +56,50 @@ public class ProdutoController : ControllerBase
             return StatusCode(500, new ResultViewModel<Produto>("Erro interno no servidor"));
         }
     }
+
+    [HttpGet("produtos")]
+
+    public async Task<IActionResult> GetProdutosAsync()
+    {
+        try
+        {
+            var produtos = await _produtoInterface.GetProdutos();
+
+            return Ok(new ResultViewModel<dynamic>(produtos));
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(500, new ResultViewModel<Produto>("Não foi possível salvar os dados"));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<Produto>("Erro interno no servidor"));
+        }
+    }
+
+    [HttpGet("produtos/{id:int}")]
+
+    public async Task<IActionResult> GetProdutoByIdAsync(
+         [FromRoute] int id
+        )
+    {
+        try
+        {
+            var produtos = await _produtoInterface.GetProdutoById(id);
+
+            if(produtos != null)
+                return Ok(new ResultViewModel<dynamic>(produtos));
+
+            return NotFound(new ResultViewModel<Produto>("Não Encontrado!"));
+        }
+        catch (DbUpdateException)
+        {
+            return StatusCode(500, new ResultViewModel<Produto>("Não foi possível salvar os dados"));
+        }
+        catch
+        {
+            return StatusCode(500, new ResultViewModel<Produto>("Erro interno no servidor"));
+        }
+    }
+
 }

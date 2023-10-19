@@ -1,8 +1,9 @@
 using Data;
 using System.Text.Json.Serialization;
+using WebApiProjeto.Data.Interface;
+using WebApiProjeto.Data.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>();
 
 ServicesMvc(builder);
 
@@ -15,6 +16,8 @@ app.Run();
 
 static void ServicesMvc(WebApplicationBuilder builder)
 {
+ 
+    
     builder.Services
     .AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -25,5 +28,6 @@ static void ServicesMvc(WebApplicationBuilder builder)
         {
             x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         });
-       
+    builder.Services.AddDbContext<AppDbContext>();
+    builder.Services.AddScoped<IProdutoInterface, ProdutoService>();
 }
